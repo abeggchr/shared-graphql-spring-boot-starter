@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile name="Gradle Imported" enabled="true">
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="false">
+          <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.springframework.boot/spring-boot-autoconfigure-processor/3.3.1/a7324a6d678912d6f4bf6fc6305f37827d2ac8e/spring-boot-autoconfigure-processor-3.3.1.jar" />
+        </processorPath>
+        <module name="graphql-info-spring-boot-starter.main" />
+      </profile>
+    </annotationProcessing>
+  </component>
+</project>

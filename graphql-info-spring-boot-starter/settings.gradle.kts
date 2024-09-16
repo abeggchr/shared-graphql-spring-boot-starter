@@ -1,2 +1,1 @@
-rootProject.name = 'graphql-info-spring-boot-starter'
-
+rootProject.name = "graphql-info-spring-boot-starter"

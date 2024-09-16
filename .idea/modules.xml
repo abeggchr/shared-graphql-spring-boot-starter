@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/graphql-info-spring-boot-starter.main.iml" filepath="$PROJECT_DIR$/.idea/modules/graphql-info-spring-boot-starter.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/shared-graphql-spring-boot-starter.iml" filepath="$PROJECT_DIR$/.idea/shared-graphql-spring-boot-starter.iml" />
     </modules>
   </component>

@@ -6,8 +6,14 @@ import org.springframework.stereotype.Controller;
 @Controller
 public class GraphQLController {
 
+    private final GraphQLStarterProperties properties;
+
+    public GraphQLController(GraphQLStarterProperties properties) {
+        this.properties = properties;
+    }
+
     @QueryMapping
     public String info() {
-        return "version=0.0.1";
+        return "version=%s".formatted(this.properties.getVersion());
     }
 }

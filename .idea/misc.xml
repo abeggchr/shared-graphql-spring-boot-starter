@@ -5,7 +5,7 @@
     <file type="web" url="file://$PROJECT_DIR$/application" />
     <file type="web" url="file://$PROJECT_DIR$/graphql-info-spring-boot-starter" />
   </component>
-  <component name="ProjectRootManager">
+  <component name="ProjectRootManager" version="2" project-jdk-name="liberica-17" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/out" />
   </component>
 </project>

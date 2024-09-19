@@ -10,7 +10,7 @@ The resulting code is available at [https://github.com/abeggchr/shared-graphql-s
 
 ## 1. Set up a Spring Boot application
 
-Create the Spring application which will later consume the starter. Start from where the Spring's ["Building a GraphQL service"](https://spring.io/guides/gs/graphql-server) finished and copy the `[completed](https://github.com/spring-guides/gs-graphql-server/tree/main/complete)` solution into our `application` folder.
+Create the Spring application which will later consume the starter. Start from where the Spring's ["Building a GraphQL service"](https://spring.io/guides/gs/graphql-server) left of and copy the [`completed`](https://github.com/spring-guides/gs-graphql-server/tree/main/complete) solution into our `application` folder.
 
 ```
 shared-graphql-spring-boot-starter
@@ -116,7 +116,7 @@ public class GraphQLStarterAutoConfiguration {
 
 This class ensures that the `GraphQLController` bean is instantiated and registered when the starter is present in the application classpath.
 
-The `@ConditionalOnMissingBean` annotation makes sure, the bean will get loaded by Spring only if there is no other bean of this type present in the context.
+The `@ConditionalOnMissingBean` annotation makes sure, the bean will get loaded by Spring only if there is no other bean of this type present in the context. 
 
 Note that it is best-practice to split the auto-configuration part of the starter and the implementation into different projects. The directory structure would look as follows. For the sake of simplicity, we are using a single project here.
 
@@ -148,7 +148,7 @@ extend type Query {
 }
 ```
 
-Spring will automatically merge the starters schema with the applications schema when the application starts up.
+Spring will automatically merge the starters schema with the applications schema when the application starts up. 
 
 Note the `extend` keyword. Without that keyword, Spring would try to merge two different `Query` types resulting in an error like `errors=['Query' type [@14:1] tried to redefine existing 'Query' type [@1:1]]`. With `extend` you can avoid this error.
 
@@ -162,9 +162,9 @@ spring.graphql.schema.locations=classpath*:graphql/**/
 
 ## 8. Use the starter in the consuming application
 
-Once your starter is ready, publish it to a Maven repository (or use a local Maven install), and include it in a Spring Boot project.
+Once your starter is ready, publish it to a Maven repository (or use a local Maven install), and include it in the `build.gradle` file of the consuming application.
 
-```build.gradle
+```gradle
 implementation 'org.example:graphql-info-spring-boot-starter:1.0-SNAPSHOT'
 ```
 
@@ -180,10 +180,11 @@ query info {
 }
 ```
 
-## 11. Dynamically set the version
+## 11. Configuratively set the version
 
 You can allow users of your starter to customize the endpoint behavior via `application.properties`. For example, you can inject version number from the configuration like this:
 
+`GraphQLStarterAutoConfiguration.java`:
 ```java
 package org.example;
 
@@ -208,6 +209,7 @@ public class GraphQLStarterAutoConfiguration {
 }
 ```
 
+`GraphQLController.java`:
 ```java
 package org.example;
 
@@ -230,6 +232,7 @@ public class GraphQLController {
 }
 ```
 
+`application.properties`:
 ```properties
 info.app.version=1.0.0
 ```
@@ -239,7 +242,7 @@ The graphql query `info` no returns the configured value `1.0.0`.
 ## 12. Add parameters
 
 Whe you add additional query or mutation methods to the starters `schema.graqphql` and `GraphQLController`,
-you might run into parameter-related errors. In that case, adding the `-parameters` compiler argument helps,
+you might run into parameter-related errors. In that case, adding the `-parameters` compiler argument helps, 
 as described in the [Spring 6.x release notes]{https://github.com/spring-projects/spring-framework/wiki/Upgrading-to-Spring-Framework-6.x#parameter-name-retention}.
 
 ``` kotlin
@@ -255,3 +258,7 @@ To get more insight into the GraphQL schema loading and query mapping process, y
 ```properties
 logging.level.org.springframework.graphql=DEBUG
 ```
+
+
+Photo by <a href="https://unsplash.com/@itfeelslikefilm?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash">Janko Ferlič</a> on <a href="https://unsplash.com/photos/photo-of-library-with-turned-on-lights-sfL_QOnmy00?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash">Unsplash</a>
+  

@@ -1,23 +1,38 @@
 # Shared GraphQL Spring Boot Starter
 
-Spring Boot starters typically contain everything to get started with a given technology (like `spring-boot-starter-web`),
-but they also provide a means to share functionality accross multiple applications (like `spring-boot-starter-actuator`).
+Published at: https://software-engineering-corner.zuehlke.com/create-own-graphql-spring-boot-starter
 
 In this article, we'll create a Spring Boot starter which will make a GraphQL endpoint available to all applications where the starter is included.
 We will cover a similar functionality as the `info` endpoint of the [actuator](https://docs.spring.io/spring-boot/api/rest/actuator/index.html) starter: displaying the applications version. But instead of a REST API, we'll provide a GraphQL endpoint.
 
 The resulting code is available at [https://github.com/abeggchr/shared-graphql-spring-boot-starter](https://github.com/abeggchr/shared-graphql-spring-boot-starter).
 
+## Why should I create my own starter?
+
+Spring Boot starters typically contain everything to get started with a given technology (such as `spring-boot-starter-web`).
+This convenience is the primary reason for using a starter.
+
+However, Spring Boot starters can also serve as a way to share functionality accross multiple applications (e.g., `spring-boot-starter-actuator`), such as displaying the version information (as described in this article)
+, tracking frontend logs
+, or loading customer data.
+With a Spring Boot starter,
+we can avoid re-implementing the same logic repeatedly in each consuming application.
+
+Of cours, a Spring Boot starter is just one option to achieve that goal.
+It can be especially useful when other options
+, like shared services or regular libraries,
+are not feasible in a given context.
+
 ## 1. Set up a Spring Boot application
 
-Create the Spring application which will later consume the starter. Start from where the Spring's ["Building a GraphQL service"](https://spring.io/guides/gs/graphql-server) left of and copy the [`completed`](https://github.com/spring-guides/gs-graphql-server/tree/main/complete) solution into our `application` folder.
+Create the Spring application which will later consume the starter. Start from where the Spring's ["Building a GraphQL service"](https://spring.io/guides/gs/graphql-server) left off and copy the [`completed`](https://github.com/spring-guides/gs-graphql-server/tree/main/complete) solution into our `application` folder.
 
 ```
 shared-graphql-spring-boot-starter
 └ application
 ```
 
-Start the application, open `http://localhost:8080/graphiql?path=/graphql` and check that you can execute GraphQL queries like:
+Start the application, open `http://localhost:8080/graphiql?path=/graphql`, and check that you can execute GraphQL queries like:
 
 ```graphql
 query bookDetails {
@@ -87,7 +102,7 @@ public class GraphQLController {
 
     @QueryMapping
     public String info() {
-        return "version=0.0.1";
+        return "version=0.0.1"; // hard coded for now, we'll make it configurable later
     }
 }
 ```
@@ -116,7 +131,7 @@ public class GraphQLStarterAutoConfiguration {
 
 This class ensures that the `GraphQLController` bean is instantiated and registered when the starter is present in the application classpath.
 
-The `@ConditionalOnMissingBean` annotation makes sure, the bean will get loaded by Spring only if there is no other bean of this type present in the context. 
+The `@ConditionalOnMissingBean` annotation makes sure, the bean will get loaded by Spring only if there is no other bean of this type present in the context.
 
 Note that it is best-practice to split the auto-configuration part of the starter and the implementation into different projects. The directory structure would look as follows. For the sake of simplicity, we are using a single project here.
 
@@ -136,19 +151,20 @@ To ensure that Spring Boot picks up the auto-configuration class, you need to re
 org.example.GraphQLStarterAutoConfiguration
 ```
 
-Note that for older Spring versions, the `spring.factories` file was used for that purpose.
+Note that in older Spring versions, the `spring.factories` file was used for that purpose.
+Refer to the [Spring documentation](https://docs.spring.io/spring-boot/reference/features/developing-auto-configuration.html) for more information about creating your own auto-configuration.
 
 ## 6. Add a GraphQL schema to the starter
 
 Place the schema file in the `src/main/resources/graphql` folder. For example, create a `schema.graphqls` file:
 
-```graphqls
+```graphql
 extend type Query {
     info: String
 }
 ```
 
-Spring will automatically merge the starters schema with the applications schema when the application starts up. 
+Spring will automatically merge the starters schema with the applications schema when the application starts up.
 
 Note the `extend` keyword. Without that keyword, Spring would try to merge two different `Query` types resulting in an error like `errors=['Query' type [@14:1] tried to redefine existing 'Query' type [@1:1]]`. With `extend` you can avoid this error.
 
@@ -182,7 +198,32 @@ query info {
 
 ## 11. Configuratively set the version
 
-You can allow users of your starter to customize the endpoint behavior via `application.properties`. For example, you can inject version number from the configuration like this:
+You can allow users of your starter to customize the endpoint behavior via `application.properties`. For example, you can inject the version number from the `application.properties` by:
+
+1. creating a `@ConfigurationProperties` annotated class which defines the properties key (i.e. `info.app.version`)
+2. configuring the new class to be injectable by modifying `GraphQLStarterAutoConfiguration`
+2. configuring the version value in `application.properties` in the consuming application
+3. injecting the version value to the `GraphQLController`
+
+`GraphQLStarterProperties.java`
+```java
+package org.example;
+
+import org.springframework.boot.context.properties.ConfigurationProperties;
+
+@ConfigurationProperties(value = "info.app")
+public class GraphQLStarterProperties {
+    private String version;
+
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
+    }
+}
+```
 
 `GraphQLStarterAutoConfiguration.java`:
 ```java
@@ -209,6 +250,11 @@ public class GraphQLStarterAutoConfiguration {
 }
 ```
 
+`application.properties`:
+```properties
+info.app.version=1.0.0
+```
+
 `GraphQLController.java`:
 ```java
 package org.example;
@@ -232,17 +278,13 @@ public class GraphQLController {
 }
 ```
 
-`application.properties`:
-```properties
-info.app.version=1.0.0
-```
-
-The graphql query `info` no returns the configured value `1.0.0`.
+The graphql query `info` now returns the configured value `1.0.0`.
 
 ## 12. Add parameters
 
-Whe you add additional query or mutation methods to the starters `schema.graqphql` and `GraphQLController`,
-you might run into parameter-related errors. In that case, adding the `-parameters` compiler argument helps, 
+When you add additional query or mutation methods to the starters `schema.graqphql` and `GraphQLController`,
+you might run into parameter-related errors.
+In that case, adding the `-parameters` compiler argument to the starters build script helps,
 as described in the [Spring 6.x release notes]{https://github.com/spring-projects/spring-framework/wiki/Upgrading-to-Spring-Framework-6.x#parameter-name-retention}.
 
 ``` kotlin
@@ -259,6 +301,17 @@ To get more insight into the GraphQL schema loading and query mapping process, y
 logging.level.org.springframework.graphql=DEBUG
 ```
 
+## Summary
+
+We created a Spring Boot starter project which adds a GraphQL endpoint to the Spring application when used.
+The starter project can now be extended with additional functionality or more means to configure its functionality.
+
+## References
+
+* [Spring > Build Systems > Starters](https://docs.spring.io/spring-boot/reference/using/build-systems.html#using.build-systems.starters)
+* [Spring > Creating Your Own Auto-configuration](https://docs.spring.io/spring-boot/reference/features/developing-auto-configuration.html)
+* [Spring > Creating Your Own Auto-configuration > Creating Your Own Starter](https://docs.spring.io/spring-boot/reference/features/developing-auto-configuration.html#features.developing-auto-configuration.custom-starter)
+
+## Credits
 
 Photo by <a href="https://unsplash.com/@itfeelslikefilm?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash">Janko Ferlič</a> on <a href="https://unsplash.com/photos/photo-of-library-with-turned-on-lights-sfL_QOnmy00?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash">Unsplash</a>
-  
